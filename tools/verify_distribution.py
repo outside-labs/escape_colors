@@ -25,7 +25,9 @@ def verify_wheel(wheel: Path, work: Path) -> None:
     python = environment / ("Scripts/python.exe" if sys.platform == "win32" else "bin/python")
     run("uv", "pip", "install", "--python", str(python), "--no-index", "--no-deps", str(wheel), cwd=work)
     shutil.copytree(ROOT / "tests", work / "tests", ignore=shutil.ignore_patterns("__pycache__"))
+    shutil.copytree(ROOT / "tools", work / "tools", ignore=shutil.ignore_patterns("__pycache__"))
     shutil.copy2(ROOT / "README.md", work / "README.md")
+    run(str(python), "-I", str(work / "tools/review_source.py"), "--root", str(ROOT), cwd=work)
     run(str(python), "-I", "-c", """
 import importlib.metadata
 from pathlib import Path
