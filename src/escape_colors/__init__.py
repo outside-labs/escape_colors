@@ -1,6 +1,8 @@
 """ANSI colors and formatting without runtime dependencies."""
 
 import os as _os
+import sys as _sys
+from typing import TextIO as _TextIO
 
 from ._codes import NAMED_CODES as _NAMED_CODES
 from ._codes import RESET as escape
@@ -10,6 +12,8 @@ from ._notation import require_text as _require_text
 from ._notation import serialize as _serialize
 from ._notation import validate_format as _validate_format
 from ._parser import render as _render
+from ._terminal import color_enabled as _color_enabled
+from ._terminal import init_windows
 
 ESCAPE_COLOR_FORMAT = _os.environ.get("ESCAPE_COLOR_FORMAT", "unicode")
 reset = escape
@@ -39,13 +43,40 @@ def escape_ansi(
     return _serialize(rendered, selected) if literal else rendered
 
 
+def ansi_print(
+    *objects: object,
+    sep: str | None = " ",
+    end: str | None = "\n",
+    file: _TextIO | None = None,
+    flush: bool = False,
+    color: bool | None = None,
+) -> None:
+    """Print nested markup, choosing color automatically unless overridden."""
+    if sep is not None and not isinstance(sep, str):
+        raise TypeError("sep must be None or a string")
+    if end is not None and not isinstance(end, str):
+        raise TypeError("end must be None or a string")
+    stream = _sys.stdout if file is None else file
+    enabled = _color_enabled(stream, color)
+    if stream is None:
+        return
+    rendered = [escape_ansi(str(obj)) for obj in objects]
+    if not enabled:
+        rendered = [strip_ansi(text) for text in rendered]
+        sep = strip_ansi(sep) if sep is not None else None
+        end = strip_ansi(end) if end is not None else None
+    print(*rendered, sep=sep, end=end, file=stream, flush=flush)
+
+
 __all__ = [
     "ESCAPE_COLOR_FORMAT",
+    "ansi_print",
     "background",
     "color",
     "escape",
     "escape_ansi",
     "format_ansi",
+    "init_windows",
     "normalize_ansi",
     "reset",
     "strip_ansi",
