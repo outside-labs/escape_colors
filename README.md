@@ -26,6 +26,7 @@ From this checkout:
 ```sh
 uv sync --locked
 uv run python examples/basic.py
+python tools/review_source.py
 uv run python -m unittest discover -s tests -v
 uv build
 uv run python tools/verify_distribution.py
@@ -192,6 +193,16 @@ emulated; automatic printing uses plain text there.
 sanitize arbitrary terminal control commands in untrusted input.
 
 ## Verification and references
+
+`python tools/review_source.py` performs a static review using only Python's
+standard library. It checks first-party Python files for syntax errors and
+`SyntaxWarning`s, checks runtime imports against the standard library and local
+modules, and reports missing internal modules. It compiles source for validation
+without executing the inspected code. Use `--format json` for structured results
+or `--root /path/to/checkout` for another source tree. Findings exit with status 1;
+invalid invocation exits with status 2. Review covers ordinary import statements,
+including conditional imports; dynamic imports and imported attributes are
+outside these checks. Runtime behavior is covered by the test suite.
 
 CI tests Python 3.14 on Linux, macOS, and Windows, builds the wheel and source
 distribution, and runs the suite from freshly installed wheel artifacts outside
