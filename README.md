@@ -21,6 +21,12 @@ output is plain by default; use `color=True` to force ANSI sequences.
 
 ## Install and develop
 
+Install from PyPI with Python 3.14 or later:
+
+```sh
+python -m pip install escape-colors
+```
+
 From this checkout:
 
 ```sh
@@ -34,6 +40,13 @@ uv run python tools/verify_distribution.py
 
 Install a built wheel into another Python environment with
 `uv pip install /path/to/escape_colors-0.1.0-py3-none-any.whl`.
+
+## Releases
+
+Publish a GitHub release with a tag matching the package version, such as
+`v0.1.0`. `.github/workflows/release.yaml` tests and verifies the distributions
+before publishing to PyPI through the `pypi` environment using Trusted Publishing.
+The workflow can also be run manually against an existing release tag.
 
 ## Colors and styles
 
